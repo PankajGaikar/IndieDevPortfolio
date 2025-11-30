@@ -6,187 +6,94 @@
 
 ---
 
-## Phase 1 – Project Setup
+## ✅ Phase 1 – Project Setup (DONE)
 
 - [x] Initialize Node.js project (TypeScript)
-- [x] Install dependencies:
-  - express (HTTP server)
-  - puppeteer (HTML → image)
-  - axios (HTTP calls)
-  - node-cache (in-memory TTL cache)
-- [x] Create base folder structure:
-  - `src/api`, `src/lib`, `src/core`, `src/templates`, `src/generator`, `src/routes`
-  - `public/`, `output/`
+- [x] Install dependencies: express, puppeteer, axios, node-cache
+- [x] Create base folder structure
 
 ---
 
-## Phase 2 – URL Parsing & Utilities
+## ✅ Phase 2 – URL Parsing & Utilities (DONE)
 
-- [ ] Implement `extractAppId(input: string)`:
-  - Support:
-    - `https://apps.apple.com/app/id123456789`
-    - `https://apps.apple.com/us/app/app-name/id123456789`
-    - `https://itunes.apple.com/.../id123456789`
-    - Raw ID: `123456789`
-  - Return `{ appId, error? }`
-- [ ] Implement `extractDeveloperId(input: string)`:
-  - Support dev URLs like `https://apps.apple.com/developer/.../id123456789`
-  - If only app URL is provided, derive `developerId` via iTunes Lookup
-- [ ] Add reusable error type(s) for "invalid URL/ID", "developer not found", etc.
+- [x] Implement `extractAppId(input: string)` - supports all URL formats + raw IDs
+- [x] Implement `extractDeveloperId(input: string)` - derives from app if needed
+- [x] Add reusable error types
 
 ---
 
-## Phase 3 – Data Layer (iTunes + Charts)
+## ✅ Phase 3 – Data Layer (DONE)
 
-### 3.1 iTunes Lookup Client
-
-- [ ] Implement `fetchAppById(appId)` using iTunes Lookup API
-  - Extract `artistId`, `artistName`
-- [ ] Implement `fetchDeveloperApps(developerId)`:
-  - Use iTunes Lookup with `entity=software`
-  - Map to internal type:
-    - id, name, icon URL
-    - average rating
-    - rating count
-- [ ] Handle API errors + empty result sets gracefully
-
-### 3.2 Caching
-
-- [ ] Implement a simple in-memory cache module:
-  - `get(key)`, `set(key, value, ttlSeconds)`
-- [ ] Cache:
-  - iTunes app data per `developerId` for **1 hour**
-  - Top charts data per `(country, chartType)` for **1 hour**
-
-### 3.3 Apple Top Charts (Trending)
-
-- [ ] Implement `fetchTopCharts(country, chartType)` using Apple RSS JSON feeds:
-  - Countries (hardcoded for POC):
-    - `US`, `IN`, `GB`, `CA`, `AU`
-  - Chart types:
-    - `top-free`
-    - `top-paid`
-  - Limit: top 200 apps
-- [ ] Return a structure like `{ appId → rank }`
-- [ ] Integrate caching so repeated calls reuse cached feeds
+- [x] iTunes Lookup Client (`fetchAppById`, `fetchDeveloperApps`)
+- [x] In-memory cache with 1-hour TTL
+- [x] Apple Top Charts fetching (175 countries!)
+- [x] **Worldwide rating aggregation** (sums ratings from all countries)
 
 ---
 
-## Phase 4 – Core Portfolio Logic
+## ✅ Phase 4 – Core Portfolio Logic (DONE)
 
-- [ ] Implement `buildDeveloperPortfolio(inputUrlOrId)`:
-  - Use `extractAppId` / `extractDeveloperId`
-  - If app ID → fetch app → get `artistId`
-  - Fetch all apps for `developerId`
-- [ ] Compute portfolio stats:
-  - Total number of apps
-  - Total ratings = sum of rating counts (only where `ratingCount > 0`)
-  - Sort apps by rating count descending
-  - Limit to **top 8 apps** for display and compute `remainingCount`
-- [ ] Handle edge cases:
-  - If an app has `0` ratings:
-    - Mark as `isNewApp = true` for display ("New App — No ratings yet")
-  - If developer has no apps:
-    - Return a clear error state
-
-### 4.2 Trending Detection (Portfolio-Level Only)
-
-- [ ] For the set of developer app IDs:
-  - Check each app against cached top charts for:
-    - Countries: US, IN, GB, CA, AU
-  - Chart types: Top Free, Top Paid
-- [ ] Build a portfolio-level summary:
-  - `totalTrendingCountries`
-  - For each country where any app appears, track best rank
-- [ ] DO NOT expose per-app trending details in POC (only portfolio-level)
-- [ ] If no apps are in top 200 in any of the 5 countries:
-  - Mark `hasTrending = false` so the UI/card can hide the section
+- [x] `buildDeveloperPortfolio()` with full stats
+- [x] Top 8 apps display, sorted by ratings
+- [x] Handle edge cases (0 ratings, no apps)
+- [x] Portfolio-level + per-app trending detection
 
 ---
 
-## Phase 5 – Card Template (HTML/CSS)
+## ✅ Phase 5 – Card Template (DONE)
 
-- [ ] Create a single HTML template: `templates/portfolioCard.html`
-  - Inputs:
-    - Developer name
-    - App list (max 8 apps, with:
-      - icon
-      - name
-      - rating (or "New App — No ratings yet")
-    - Total apps count (`displayed + remaining`)
-    - Total ratings
-    - Trending summary:
-      - If `hasTrending`:
-        - Text like: "Trending in 3 countries"
-        - List of country badges with short labels:
-          - e.g., "🇺🇸 Top 80", "🇮🇳 Top 50"
-      - If `!hasTrending`:
-        - Hide trending block entirely
-- [ ] Layout:
-  - Landscape card suitable for Twitter/OG image:
-    - ~1200 x 630
-  - Clean, modern design:
-    - One background gradient
-    - App icons in a grid (2 rows max)
-    - Footer with small "Generated with indie-portfolio.showcase" text
+- [x] HTML/CSS template with dynamic data
+- [x] 3 styles: Dark, Light, Minimal
+- [x] 3 sizes: Landscape (1200x630), Story (1080x1920), Square (1080x1080)
+- [x] Per-app rank badges
+- [x] Trending country flags
 
 ---
 
-## Phase 6 – Image Generation (Puppeteer)
+## ✅ Phase 6 – Image Generation (DONE)
 
-- [ ] Implement `generatePortfolioImage(portfolioData)`:
-  - Render `portfolioCard.html` with dynamic data
-  - Launch Puppeteer
-  - Set viewport to card size (e.g. 1200x630)
-  - Wait for images (app icons) to load
-  - Screenshot only the card container element
-  - Save to `/output` locally in dev; return buffer/stream in prod
-- [ ] Handle Puppeteer failures:
-  - Timeouts
-  - Render errors
-  - Return a clear error to the client
+- [x] Puppeteer rendering at 2x for retina
+- [x] Wait for app icons to load
+- [x] Error handling for timeouts
 
 ---
 
-## Phase 7 – HTTP API & Simple Frontend
+## ✅ Phase 7 – API & Frontend (DONE)
 
-### 7.1 API
-
-- [ ] Implement `POST /api/generate`:
-  - Body: `{ "input": "<app-or-developer-url-or-id>" }`
-  - Validate input
-  - Call `buildDeveloperPortfolio`
-  - Call `generatePortfolioImage`
-  - Respond with:
-    - Image as `image/png` OR
-    - JSON with a temporary image URL
-
-### 7.2 Frontend
-
-- [ ] Create minimal `public/index.html`:
-  - Text input for URL / ID
-  - "Generate card" button
-  - Area to display:
-    - Loading state
-    - Generated image
-    - "Download" button
-- [ ] Hook frontend to `POST /api/generate` using fetch()
+- [x] `POST /api/generate` - returns PNG image
+- [x] `POST /api/generate/json` - returns portfolio data
+- [x] Frontend with style/size selectors
+- [x] Loading states, download button
 
 ---
 
-## Phase 8 – Polish & Testing
+## ✅ Phase 8 – Global Features (DONE)
 
-- [ ] Test with:
-  - Developers with many apps (30+)
-  - Developers with 1–2 apps
-  - Apps with 0 ratings
-- [ ] Verify:
-  - Caching works (logs / timings)
-  - Trending block behavior:
-    - Shows up when there is trending
-    - Completely hidden when there is none
-- [ ] Add basic logging for:
-  - Incoming requests
-  - iTunes/charts fetches (cache hit/miss)
-  - Puppeteer generation time
+- [x] 175 country support for trending
+- [x] 3 scan modes: quick (5), major (20), global (175)
+- [x] Per-app trending badges on cards
+- [x] **Worldwide rating aggregation** from all countries
 
+---
+
+## 🚀 What's Next?
+
+### Option A: Test & Polish
+- [ ] Test UI in browser (http://localhost:3000)
+- [ ] Update card to show "Worldwide" vs "US" ratings
+- [ ] Add progress indicator for global scan
+
+### Option B: Deploy
+- [ ] Deploy to Vercel/Railway/Render
+- [ ] Add custom domain
+- [ ] Add rate limiting for public use
+
+### Option C: Performance
+- [ ] Background job for global scan (websocket updates)
+- [ ] Pre-cache popular developers
+- [ ] Optimize worldwide rating fetching
+
+### Option D: More Features
+- [ ] "Flagship app" card type
+- [ ] Historical trending data
+- [ ] Share directly to Twitter/LinkedIn

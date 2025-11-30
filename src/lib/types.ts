@@ -56,7 +56,8 @@ export interface PortfolioApp {
   name: string;
   iconUrl: string;
   rating: number;              // 0-5, rounded to 1 decimal
-  ratingCount: number;
+  ratingCount: number;         // Country-specific (usually US)
+  worldwideRatingCount?: number; // Aggregated from all countries (only with global scan)
   isNewApp: boolean;           // true if ratingCount === 0
   isFree: boolean;
 }
@@ -65,40 +66,38 @@ export interface PortfolioApp {
 // Trending Data
 // --------------------------
 
-export type CountryCode = 'US' | 'IN' | 'GB' | 'CA' | 'AU';
 export type ChartType = 'top-free' | 'top-paid';
-
-export const SUPPORTED_COUNTRIES: CountryCode[] = ['US', 'IN', 'GB', 'CA', 'AU'];
 export const CHART_TYPES: ChartType[] = ['top-free', 'top-paid'];
 
-export const COUNTRY_FLAGS: Record<CountryCode, string> = {
-  US: '🇺🇸',
-  IN: '🇮🇳',
-  GB: '🇬🇧',
-  CA: '🇨🇦',
-  AU: '🇦🇺',
-};
-
-export const COUNTRY_NAMES: Record<CountryCode, string> = {
-  US: 'United States',
-  IN: 'India',
-  GB: 'United Kingdom',
-  CA: 'Canada',
-  AU: 'Australia',
-};
+// Scan modes
+export type ScanMode = 'quick' | 'major' | 'global';
 
 export interface TrendingCountry {
-  countryCode: CountryCode;
+  countryCode: string;
   flag: string;                // e.g., "🇺🇸"
   countryName: string;         // e.g., "United States"
   bestRank: number;            // Best rank among all apps in this country
   chartType: ChartType;        // Which chart (top-free or top-paid)
 }
 
+export interface AppTrendingInfo {
+  appId: string;
+  appName: string;
+  rating: number;                      // App rating (0-5)
+  ratingCount: number;                 // Country-specific ratings (usually US)
+  worldwideRatingCount?: number;       // Aggregated ratings from all countries
+  trendingIn: TrendingCountry[];       // Countries where this app is ranked
+  bestGlobalRank: number | null;       // Best rank across all countries
+  bestCountry: string | null;          // Country with best rank
+}
+
 export interface TrendingSummary {
   hasTrending: boolean;
   totalTrendingCountries: number;
-  countries: TrendingCountry[];  // Sorted by bestRank ascending
+  countries: TrendingCountry[];      // Portfolio-level: best rank per country
+  perAppTrending: AppTrendingInfo[]; // Per-app trending data
+  scanMode: ScanMode;
+  countriesScanned: number;
 }
 
 // --------------------------
@@ -144,7 +143,7 @@ export interface ChartEntry {
 }
 
 export interface ChartData {
-  country: CountryCode;
+  country: string;
   chartType: ChartType;
   entries: Map<string, number>;  // appId → rank
   fetchedAt: Date;
@@ -155,9 +154,10 @@ export interface ChartData {
 // --------------------------
 
 export interface GenerateRequest {
-  input: string;  // App URL, Developer URL, or raw ID
+  input: string;      // App URL, Developer URL, or raw ID
   style?: CardStyle;  // Card style: dark, light, minimal
   size?: CardSize;    // Card size: landscape, story, square
+  scanMode?: ScanMode; // Trending scan: quick (5), major (20), global (175)
 }
 
 export interface GenerateSuccessResponse {
@@ -181,7 +181,7 @@ export type GenerateResponse = GenerateSuccessResponse | GenerateErrorResponse;
 export const CacheKeys = {
   developerApps: (developerId: string) => `dev:${developerId}`,
   appLookup: (appId: string) => `app:${appId}`,
-  chart: (country: CountryCode, chartType: ChartType) => `chart:${country}:${chartType}`,
+  chart: (country: string, chartType: ChartType) => `chart:${country}:${chartType}`,
 } as const;
 
 // Cache TTL in seconds (1 hour)

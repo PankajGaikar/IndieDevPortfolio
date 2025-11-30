@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { buildDeveloperPortfolio } from '../core/portfolioService';
 import { generatePortfolioImage, generateOutputFilename } from '../generator/imageGenerator';
-import { GenerateRequest, GenerateResponse, CardStyle, CardSize, CARD_STYLES, CARD_DIMENSIONS } from '../lib/types';
+import { GenerateRequest, GenerateResponse, CardStyle, CardSize, ScanMode, CARD_STYLES, CARD_DIMENSIONS } from '../lib/types';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const VALID_SIZES: CardSize[] = ['landscape', 'story', 'square'];
+const VALID_SCAN_MODES: ScanMode[] = ['quick', 'major', 'global'];
 
 const router = Router();
 
@@ -27,7 +28,7 @@ if (!fs.existsSync(OUTPUT_DIR)) {
  */
 router.post('/', async (req: Request, res: Response) => {
   const startTime = Date.now();
-  const { input, style: requestedStyle, size: requestedSize } = req.body as GenerateRequest;
+  const { input, style: requestedStyle, size: requestedSize, scanMode: requestedScanMode } = req.body as GenerateRequest;
   
   // Validate and default style
   const style: CardStyle = CARD_STYLES.includes(requestedStyle as CardStyle) 
@@ -39,7 +40,12 @@ router.post('/', async (req: Request, res: Response) => {
     ? (requestedSize as CardSize)
     : 'landscape';
 
-  console.log(`[API] Generate request: ${input} (style: ${style}, size: ${size})`);
+  // Validate and default scan mode
+  const scanMode: ScanMode = VALID_SCAN_MODES.includes(requestedScanMode as ScanMode)
+    ? (requestedScanMode as ScanMode)
+    : 'quick';
+
+  console.log(`[API] Generate request: ${input} (style: ${style}, size: ${size}, scan: ${scanMode})`);
 
   // Validate input
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
@@ -53,7 +59,7 @@ router.post('/', async (req: Request, res: Response) => {
 
   try {
     // Step 1: Build the portfolio data
-    const portfolioResult = await buildDeveloperPortfolio(input.trim());
+    const portfolioResult = await buildDeveloperPortfolio(input.trim(), scanMode);
 
     if (!portfolioResult.success) {
       const response: GenerateResponse = {
@@ -106,9 +112,14 @@ router.post('/', async (req: Request, res: Response) => {
  * Useful for previewing data before image generation
  */
 router.post('/json', async (req: Request, res: Response) => {
-  const { input } = req.body as GenerateRequest;
+  const { input, scanMode: requestedScanMode } = req.body as GenerateRequest;
 
-  console.log(`[API] JSON request: ${input}`);
+  // Validate and default scan mode
+  const scanMode: ScanMode = VALID_SCAN_MODES.includes(requestedScanMode as ScanMode)
+    ? (requestedScanMode as ScanMode)
+    : 'quick';
+
+  console.log(`[API] JSON request: ${input} (scan: ${scanMode})`);
 
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
     return res.status(400).json({
@@ -119,7 +130,7 @@ router.post('/json', async (req: Request, res: Response) => {
   }
 
   try {
-    const portfolioResult = await buildDeveloperPortfolio(input.trim());
+    const portfolioResult = await buildDeveloperPortfolio(input.trim(), scanMode);
 
     if (!portfolioResult.success) {
       return res.status(400).json({

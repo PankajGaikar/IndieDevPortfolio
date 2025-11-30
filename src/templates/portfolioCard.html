@@ -168,6 +168,16 @@
       font-weight: 500;
     }
 
+    .stat-badge.worldwide {
+      background: var(--accent-bg);
+      border-color: var(--accent-border);
+    }
+
+    .stat-badge.worldwide .stat-label {
+      color: var(--accent);
+      text-transform: none;
+    }
+
     /* Apps Grid */
     .apps-section {
       flex: 1;
@@ -191,13 +201,31 @@
       text-align: center;
     }
 
+    .app-icon-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
     .app-icon {
       width: 80px;
       height: 80px;
       border-radius: 18px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      margin-bottom: 12px;
       object-fit: cover;
+    }
+
+    .app-rank-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.2);
     }
 
     .app-name {
@@ -381,6 +409,11 @@
       border-radius: 22px;
     }
 
+    .card.story .app-rank-badge {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
     .card.story .app-name {
       font-size: 16px;
       max-width: 220px;
@@ -466,6 +499,13 @@
       border-radius: 16px;
     }
 
+    .card.square .app-rank-badge {
+      font-size: 10px;
+      padding: 2px 5px;
+      top: -4px;
+      right: -4px;
+    }
+
     .card.square .app-name {
       font-size: 12px;
       max-width: 150px;
@@ -516,9 +556,9 @@
           <div class="stat-value">{{totalApps}}</div>
           <div class="stat-label">Apps</div>
         </div>
-        <div class="stat-badge">
+        <div class="stat-badge {{#hasWorldwideRatings}}worldwide{{/hasWorldwideRatings}}">
           <div class="stat-value">{{totalRatings}}</div>
-          <div class="stat-label">Ratings</div>
+          <div class="stat-label">{{#hasWorldwideRatings}}🌍 Worldwide{{/hasWorldwideRatings}}{{^hasWorldwideRatings}}Ratings{{/hasWorldwideRatings}}</div>
         </div>
       </div>
     </div>
@@ -528,7 +568,12 @@
       <div class="apps-grid">
         {{#apps}}
         <div class="app-item">
-          <img class="app-icon" src="{{iconUrl}}" alt="{{name}}" crossorigin="anonymous">
+          <div class="app-icon-wrapper">
+            <img class="app-icon" src="{{iconUrl}}" alt="{{name}}" crossorigin="anonymous">
+            {{#hasTrending}}
+            <div class="app-rank-badge">{{trendingBadge}}</div>
+            {{/hasTrending}}
+          </div>
           <div class="app-name">{{name}}</div>
           {{#isNewApp}}
           <div class="app-rating new-app">New App</div>

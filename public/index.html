@@ -269,6 +269,129 @@
       color: #4ade80;
     }
 
+    /* Progress Bar */
+    .progress-container {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .progress-container.visible {
+      display: block;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--bg-secondary);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Search Dropdown */
+    .search-container {
+      position: relative;
+    }
+
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-top: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .search-results.visible {
+      display: block;
+    }
+
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-result-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .search-result-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .search-result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-result-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-result-developer {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-result-rating {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .search-loading {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .search-empty {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
     /* Skeleton Loading */
     .skeleton-section {
       display: none;
@@ -530,6 +653,59 @@
       font-weight: 400;
     }
 
+    /* Scan Selector */
+    .scan-selector {
+      margin-bottom: 24px;
+    }
+
+    .scan-options {
+      display: flex;
+      gap: 12px;
+    }
+
+    .scan-option {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 14px 12px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .scan-option:hover {
+      border-color: var(--accent-purple);
+      color: var(--text-primary);
+    }
+
+    .scan-option.active {
+      border-color: var(--accent-purple);
+      background: var(--accent-purple-dim);
+      color: var(--text-primary);
+    }
+
+    .scan-icon {
+      font-size: 20px;
+    }
+
+    .scan-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .scan-option.active .scan-label {
+      color: var(--accent-purple);
+    }
+
     /* Example URLs */
     .examples {
       margin-top: 32px;
@@ -666,15 +842,16 @@
 
     <div class="main-card">
       <div class="input-group">
-        <label class="input-label">App Store URL or Developer ID</label>
-        <div class="input-wrapper">
+        <label class="input-label">Search for an app or paste App Store URL</label>
+        <div class="input-wrapper search-container">
           <input 
             type="text" 
             class="url-input" 
             id="urlInput"
-            placeholder="https://apps.apple.com/app/your-app/id123456789"
+            placeholder="Search by app name or paste URL..."
             autocomplete="off"
           >
+          <div class="search-results" id="searchResults"></div>
         </div>
       </div>
 
@@ -719,12 +896,40 @@
         </div>
       </div>
 
+      <div class="scan-selector">
+        <label class="input-label">Trending Scan</label>
+        <div class="scan-options">
+          <button class="scan-option active" data-scan="quick" onclick="selectScan('quick')">
+            <span class="scan-icon">⚡</span>
+            <span>Quick</span>
+            <span class="scan-label">5 countries</span>
+          </button>
+          <button class="scan-option" data-scan="major" onclick="selectScan('major')">
+            <span class="scan-icon">🌍</span>
+            <span>Major</span>
+            <span class="scan-label">20 markets</span>
+          </button>
+          <button class="scan-option" data-scan="global" onclick="selectScan('global')">
+            <span class="scan-icon">🌐</span>
+            <span>Global</span>
+            <span class="scan-label">175 countries</span>
+          </button>
+        </div>
+      </div>
+
       <button class="generate-btn" id="generateBtn" onclick="generateCard()">
         <span id="btnText">Generate Portfolio Card</span>
         <div class="loading-spinner" id="btnSpinner" style="display: none;"></div>
       </button>
 
       <div class="status" id="status"></div>
+
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">Initializing...</div>
+      </div>
 
       <div class="examples">
         <div class="examples-label">Try an example:</div>
@@ -809,6 +1014,9 @@
     let currentDeveloperName = '';
     let currentStyle = 'dark';
     let currentSize = 'landscape';
+    let currentScanMode = 'quick';
+    let searchTimeout = null;
+    let progressInterval = null;
 
     function selectStyle(style) {
       currentStyle = style;
@@ -821,6 +1029,13 @@
       currentSize = size;
       document.querySelectorAll('.size-option').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.size === size);
+      });
+    }
+
+    function selectScan(mode) {
+      currentScanMode = mode;
+      document.querySelectorAll('.scan-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.scan === mode);
       });
     }
 
@@ -844,6 +1059,108 @@
       document.getElementById('status').className = 'status';
     }
 
+    // Progress bar functions
+    function showProgress(percent, text) {
+      const container = document.getElementById('progressContainer');
+      const fill = document.getElementById('progressFill');
+      const textEl = document.getElementById('progressText');
+      
+      container.className = 'progress-container visible';
+      fill.style.width = `${percent}%`;
+      textEl.textContent = text;
+    }
+
+    function hideProgress() {
+      document.getElementById('progressContainer').className = 'progress-container';
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    }
+
+    function simulateProgress() {
+      let progress = 0;
+      const steps = currentScanMode === 'global' 
+        ? ['Fetching app data...', 'Loading developer portfolio...', 'Scanning 175 countries for trending...', 'Aggregating worldwide ratings...', 'Generating card...']
+        : currentScanMode === 'major'
+        ? ['Fetching app data...', 'Loading developer portfolio...', 'Scanning 20 markets...', 'Aggregating ratings...', 'Generating card...']
+        : ['Fetching app data...', 'Loading developer portfolio...', 'Checking trending...', 'Generating card...'];
+      
+      let stepIndex = 0;
+      const totalTime = currentScanMode === 'global' ? 150000 : currentScanMode === 'major' ? 30000 : 10000;
+      const stepTime = totalTime / steps.length;
+      
+      showProgress(5, steps[0]);
+      
+      progressInterval = setInterval(() => {
+        progress += (100 / steps.length) * 0.1;
+        if (progress >= ((stepIndex + 1) / steps.length) * 100 && stepIndex < steps.length - 1) {
+          stepIndex++;
+        }
+        if (progress > 95) progress = 95;
+        showProgress(progress, steps[stepIndex]);
+      }, stepTime / 10);
+    }
+
+    // Search functionality
+    async function searchApps(query) {
+      const resultsEl = document.getElementById('searchResults');
+      
+      if (query.length < 2) {
+        resultsEl.className = 'search-results';
+        return;
+      }
+
+      // Check if it looks like a URL or ID - don't search
+      if (query.includes('apple.com') || query.includes('itunes.apple.com') || /^\d+$/.test(query)) {
+        resultsEl.className = 'search-results';
+        return;
+      }
+
+      resultsEl.className = 'search-results visible';
+      resultsEl.innerHTML = '<div class="search-loading">Searching...</div>';
+
+      try {
+        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=software&limit=8`);
+        const data = await response.json();
+
+        if (data.results.length === 0) {
+          resultsEl.innerHTML = '<div class="search-empty">No apps found</div>';
+          return;
+        }
+
+        resultsEl.innerHTML = data.results.map(app => `
+          <div class="search-result-item" onclick="selectApp('${app.trackId}', '${escapeHtml(app.trackName)}')">
+            <img class="search-result-icon" src="${app.artworkUrl100}" alt="${escapeHtml(app.trackName)}">
+            <div class="search-result-info">
+              <div class="search-result-name">${escapeHtml(app.trackName)}</div>
+              <div class="search-result-developer">${escapeHtml(app.artistName)}</div>
+            </div>
+            <div class="search-result-rating">⭐ ${app.averageUserRating ? app.averageUserRating.toFixed(1) : 'N/A'}</div>
+          </div>
+        `).join('');
+      } catch (error) {
+        resultsEl.innerHTML = '<div class="search-empty">Search failed</div>';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function selectApp(appId, appName) {
+      document.getElementById('urlInput').value = appId;
+      document.getElementById('searchResults').className = 'search-results';
+    }
+
+    function hideSearchResults() {
+      setTimeout(() => {
+        document.getElementById('searchResults').className = 'search-results';
+      }, 200);
+    }
+
     function useExample(appId) {
       document.getElementById('urlInput').value = appId;
       generateCard();
@@ -862,21 +1179,26 @@
       const input = document.getElementById('urlInput').value.trim();
       
       if (!input) {
-        showStatus('Please enter an App Store URL or ID', 'error');
+        showStatus('Please enter an App Store URL, ID, or search for an app', 'error');
         return;
       }
+
+      // Hide search results
+      document.getElementById('searchResults').className = 'search-results';
 
       setLoading(true);
       hideStatus();
       showSkeleton();
+      simulateProgress();
 
       try {
-        showStatus('🔍 Fetching app data from App Store...', 'loading');
+        const scanLabel = currentScanMode === 'global' ? '175 countries' : currentScanMode === 'major' ? '20 markets' : '5 countries';
+        showStatus(`🔍 Scanning ${scanLabel} for trending...`, 'loading');
 
         const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ input, style: currentStyle, size: currentSize }),
+          body: JSON.stringify({ input, style: currentStyle, size: currentSize, scanMode: currentScanMode }),
         });
 
         if (!response.ok) {
@@ -894,6 +1216,10 @@
         currentImageBlob = await response.blob();
         const imageUrl = URL.createObjectURL(currentImageBlob);
 
+        // Complete progress
+        showProgress(100, 'Done!');
+        setTimeout(hideProgress, 500);
+
         // Hide skeleton and show result
         hideSkeleton();
         document.getElementById('resultImage').src = imageUrl;
@@ -905,6 +1231,7 @@
 
       } catch (error) {
         console.error('Generation error:', error);
+        hideProgress();
         hideSkeleton();
         showStatus(`❌ ${error.message}`, 'error');
       } finally {
@@ -931,10 +1258,25 @@
       return n.toString();
     }
 
-    // Allow Enter key to trigger generation
-    document.getElementById('urlInput').addEventListener('keypress', (e) => {
+    // Event listeners
+    const urlInput = document.getElementById('urlInput');
+    
+    urlInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         generateCard();
+      }
+    });
+
+    urlInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => searchApps(e.target.value.trim()), 300);
+    });
+
+    urlInput.addEventListener('blur', hideSearchResults);
+
+    urlInput.addEventListener('focus', (e) => {
+      if (e.target.value.trim().length >= 2) {
+        searchApps(e.target.value.trim());
       }
     });
   </script>

@@ -14,7 +14,8 @@ let browserInstance: Browser | null = null;
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.connected) {
     console.log('[Generator] Launching Puppeteer browser...');
-    browserInstance = await puppeteer.launch({
+    
+    const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
       headless: true,
       args: [
         '--no-sandbox',
@@ -22,9 +23,18 @@ async function getBrowser(): Promise<Browser> {
         '--disable-dev-shm-usage',
         '--disable-web-security',
         '--allow-file-access-from-files',
+        '--disable-gpu',
       ],
       timeout: 60000,
-    });
+    };
+
+    // Use system Chromium if specified (for Docker/serverless)
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      console.log(`[Generator] Using Chromium at: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
+    }
+
+    browserInstance = await puppeteer.launch(launchOptions);
   }
   return browserInstance;
 }

@@ -1,0 +1,9 @@
+node_modules
+dist
+output/*.png
+.git
+.gitignore
+*.md
+.env
+.env.*
+

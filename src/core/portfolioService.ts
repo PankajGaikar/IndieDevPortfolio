@@ -5,12 +5,14 @@ import {
   getDeveloperIdFromApp,
   toPortfolioApp,
   formatRatingCount,
+  fetchWorldwideRatingsForApps,
 } from '../api/itunesClient';
 import { buildTrendingSummary } from './trendingService';
 import {
   PortfolioData,
   PortfolioApp,
   MAX_DISPLAYED_APPS,
+  ScanMode,
 } from '../lib/types';
 
 export interface PortfolioResult {
@@ -30,9 +32,10 @@ export type BuildPortfolioResult = PortfolioResult | PortfolioError;
  * Build a complete developer portfolio from an App Store URL or ID
  */
 export async function buildDeveloperPortfolio(
-  input: string
+  input: string,
+  scanMode: ScanMode = 'quick'
 ): Promise<BuildPortfolioResult> {
-  console.log(`[Portfolio] Building portfolio for input: ${input}`);
+  console.log(`[Portfolio] Building portfolio for input: ${input} (scan: ${scanMode})`);
 
   // Step 1: Parse the input to get an ID
   const parseResult = extractAppId(input);
@@ -88,21 +91,42 @@ export async function buildDeveloperPortfolio(
     developerName = allApps[0].artistName;
   }
 
-  // Step 4: Convert to portfolio apps and sort by rating count
-  const portfolioApps: PortfolioApp[] = allApps
-    .map(toPortfolioApp)
-    .sort((a, b) => b.ratingCount - a.ratingCount);
+  // Step 4: Convert to portfolio apps
+  let portfolioApps: PortfolioApp[] = allApps.map(toPortfolioApp);
 
-  // Step 5: Calculate stats
-  const totalRatings = portfolioApps.reduce((sum, app) => sum + app.ratingCount, 0);
+  // Step 5: Fetch worldwide ratings if doing global or major scan
+  if (scanMode === 'global' || scanMode === 'major') {
+    console.log(`[Portfolio] Fetching worldwide ratings (${scanMode} scan)...`);
+    const appIds = portfolioApps.map(app => app.id);
+    const worldwideRatings = await fetchWorldwideRatingsForApps(appIds, scanMode);
+    
+    // Update apps with worldwide ratings
+    portfolioApps = portfolioApps.map(app => {
+      const wwRatings = worldwideRatings.get(app.id);
+      return {
+        ...app,
+        worldwideRatingCount: wwRatings?.totalRatingCount || app.ratingCount,
+      };
+    });
+  }
+
+  // Sort by worldwide ratings (if available) or regular rating count
+  portfolioApps.sort((a, b) => 
+    (b.worldwideRatingCount || b.ratingCount) - (a.worldwideRatingCount || a.ratingCount)
+  );
+
+  // Step 6: Calculate stats (use worldwide ratings if available)
+  const totalRatings = portfolioApps.reduce(
+    (sum, app) => sum + (app.worldwideRatingCount || app.ratingCount), 
+    0
+  );
   const displayedApps = portfolioApps.slice(0, MAX_DISPLAYED_APPS);
   const remainingApps = portfolioApps.length - displayedApps.length;
 
-  // Step 6: Check trending status
-  const appIds = portfolioApps.map(app => app.id);
-  const trendingSummary = await buildTrendingSummary(appIds);
+  // Step 7: Check trending status (pass all apps for per-app trending)
+  const trendingSummary = await buildTrendingSummary(portfolioApps, scanMode);
 
-  // Step 7: Build the final portfolio data
+  // Step 8: Build the final portfolio data
   const portfolioData: PortfolioData = {
     developer: {
       id: developerId,
@@ -135,21 +159,50 @@ export function prepareTemplateData(
   portfolio: PortfolioData,
   style: string = 'dark'
 ): Record<string, unknown> {
+  // Create a map of app ID to trending info for quick lookup
+  const appTrendingMap = new Map(
+    portfolio.trending.perAppTrending.map(t => [t.appId, t])
+  );
+
+  // Check if any app has worldwide ratings
+  const hasWorldwideRatings = portfolio.apps.some(app => !!app.worldwideRatingCount);
+
   return {
     developerName: portfolio.developer.name,
     totalApps: portfolio.stats.totalApps,
     totalRatings: formatRatingCount(portfolio.stats.totalRatings),
-    apps: portfolio.apps.map(app => ({
-      ...app,
-      ratingCountFormatted: formatRatingCount(app.ratingCount),
-    })),
+    hasWorldwideRatings,
+    apps: portfolio.apps.map(app => {
+      const trending = appTrendingMap.get(app.id);
+      const effectiveRatingCount = app.worldwideRatingCount || app.ratingCount;
+      return {
+        ...app,
+        ratingCountFormatted: formatRatingCount(effectiveRatingCount),
+        worldwideRatingCountFormatted: app.worldwideRatingCount 
+          ? formatRatingCount(app.worldwideRatingCount)
+          : null,
+        hasWorldwideRatings: !!app.worldwideRatingCount,
+        // Per-app trending
+        hasTrending: trending && trending.trendingIn.length > 0,
+        trendingCount: trending?.trendingIn.length || 0,
+        bestRank: trending?.bestGlobalRank,
+        bestCountry: trending?.bestCountry,
+        trendingBadge: trending && trending.bestGlobalRank 
+          ? `#${trending.bestGlobalRank}` 
+          : null,
+      };
+    }),
     hasRemainingApps: portfolio.stats.remainingApps > 0,
     remainingApps: portfolio.stats.remainingApps,
+    // Portfolio-level trending
     hasTrending: portfolio.trending.hasTrending,
     noTrending: !portfolio.trending.hasTrending,
     trendingCountryCount: portfolio.trending.totalTrendingCountries,
     trendingCountryLabel: portfolio.trending.totalTrendingCountries === 1 ? 'country' : 'countries',
-    trendingCountries: portfolio.trending.countries,
+    trendingCountries: portfolio.trending.countries.slice(0, 10), // Top 10 for display
+    countriesScanned: portfolio.trending.countriesScanned,
+    scanMode: portfolio.trending.scanMode,
+    isGlobalScan: portfolio.trending.scanMode === 'global',
     // Card style
     cardStyle: style,
     isLight: style === 'light',
