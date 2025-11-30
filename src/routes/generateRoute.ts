@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { buildDeveloperPortfolio } from '../core/portfolioService';
 import { generatePortfolioImage, generateOutputFilename } from '../generator/imageGenerator';
-import { GenerateRequest, GenerateResponse } from '../lib/types';
+import { GenerateRequest, GenerateResponse, CardStyle, CARD_STYLES } from '../lib/types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -25,9 +25,14 @@ if (!fs.existsSync(OUTPUT_DIR)) {
  */
 router.post('/', async (req: Request, res: Response) => {
   const startTime = Date.now();
-  const { input } = req.body as GenerateRequest;
+  const { input, style: requestedStyle } = req.body as GenerateRequest;
+  
+  // Validate and default style
+  const style: CardStyle = CARD_STYLES.includes(requestedStyle as CardStyle) 
+    ? (requestedStyle as CardStyle) 
+    : 'dark';
 
-  console.log(`[API] Generate request: ${input}`);
+  console.log(`[API] Generate request: ${input} (style: ${style})`);
 
   // Validate input
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
@@ -53,7 +58,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Step 2: Generate the image
-    const imageBuffer = await generatePortfolioImage(portfolioResult.data);
+    const imageBuffer = await generatePortfolioImage(portfolioResult.data, style);
 
     // Step 3: Save to output directory (optional, for debugging)
     const filename = generateOutputFilename(portfolioResult.data.developer.id);

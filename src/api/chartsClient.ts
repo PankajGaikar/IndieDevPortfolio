@@ -10,22 +10,36 @@ import {
   CHART_TYPES,
 } from '../lib/types';
 
-const APPLE_RSS_BASE = 'https://rss.marketingtools.apple.com/api/v2';
+// Legacy iTunes RSS feed - more reliable than the new marketing tools API
+const ITUNES_RSS_BASE = 'https://itunes.apple.com';
 
-interface AppleRSSApp {
-  id: string;
-  name: string;
-  url: string;
+// Map chart types to iTunes RSS feed names
+const CHART_TYPE_MAP: Record<ChartType, string> = {
+  'top-free': 'topfreeapplications',
+  'top-paid': 'toppaidapplications',
+};
+
+// iTunes RSS feed response structure
+interface iTunesRSSEntry {
+  'im:name': { label: string };
+  id: {
+    label: string;
+    attributes: {
+      'im:id': string;
+      'im:bundleId': string;
+    };
+  };
 }
 
-interface AppleRSSFeed {
+interface iTunesRSSFeed {
   feed: {
-    results: AppleRSSApp[];
+    entry: iTunesRSSEntry[];
   };
 }
 
 /**
  * Fetch top charts for a specific country and chart type
+ * Uses the legacy iTunes RSS feed which is more reliable
  * Returns a Map of appId -> rank
  */
 export async function fetchTopCharts(
@@ -38,25 +52,33 @@ export async function fetchTopCharts(
     console.log(`[Charts] Fetching ${chartType} for ${country}`);
     
     try {
-      // Apple RSS feed URL format
-      // Example: https://rss.applemarketingtools.com/api/v2/us/apps/top-free/200/apps.json
-      const url = `${APPLE_RSS_BASE}/${country.toLowerCase()}/apps/${chartType}/${TOP_CHART_LIMIT}/apps.json`;
+      // iTunes RSS feed URL format
+      // Example: https://itunes.apple.com/us/rss/topfreeapplications/limit=200/json
+      const feedName = CHART_TYPE_MAP[chartType];
+      const url = `${ITUNES_RSS_BASE}/${country.toLowerCase()}/rss/${feedName}/limit=${TOP_CHART_LIMIT}/json`;
       
-      const response = await axios.get<AppleRSSFeed>(url, {
-        timeout: 10000,
+      const response = await axios.get<iTunesRSSFeed>(url, {
+        timeout: 15000,
+        headers: {
+          'Accept': 'application/json',
+        },
       });
 
       const chartMap = new Map<string, number>();
       
-      response.data.feed.results.forEach((app, index) => {
-        // Rank is 1-indexed
-        chartMap.set(app.id, index + 1);
+      const entries = response.data?.feed?.entry || [];
+      entries.forEach((entry, index) => {
+        const appId = entry.id?.attributes?.['im:id'];
+        if (appId) {
+          // Rank is 1-indexed
+          chartMap.set(appId, index + 1);
+        }
       });
 
       console.log(`[Charts] Got ${chartMap.size} apps for ${country}/${chartType}`);
       return chartMap;
     } catch (error) {
-      console.error(`[Charts] Error fetching ${country}/${chartType}:`, error);
+      console.error(`[Charts] Error fetching ${country}/${chartType}:`, error instanceof Error ? error.message : error);
       // Return empty map on error - don't fail the whole request
       return new Map<string, number>();
     }
@@ -145,4 +167,3 @@ export async function prefetchAllCharts(): Promise<void> {
   await Promise.all(promises);
   console.log('[Charts] Prefetch complete');
 }
-

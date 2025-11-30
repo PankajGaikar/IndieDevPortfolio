@@ -1,7 +1,7 @@
 import puppeteer, { Browser } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PortfolioData } from '../lib/types';
+import { PortfolioData, CardStyle } from '../lib/types';
 import { prepareTemplateData } from '../core/portfolioService';
 
 const CARD_WIDTH = 1200;
@@ -78,15 +78,21 @@ function renderTemplate(template: string, data: Record<string, unknown>): string
  * Generate a portfolio card image from portfolio data
  */
 export async function generatePortfolioImage(
-  portfolio: PortfolioData
+  portfolio: PortfolioData,
+  style: CardStyle = 'dark'
 ): Promise<Buffer> {
-  console.log(`[Generator] Generating image for ${portfolio.developer.name}`);
+  console.log(`[Generator] Generating ${style} image for ${portfolio.developer.name}`);
   const startTime = Date.now();
 
   // Read and render the template
   const templateHtml = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
-  const templateData = prepareTemplateData(portfolio);
-  const renderedHtml = renderTemplate(templateHtml, templateData);
+  const templateData = prepareTemplateData(portfolio, style);
+  let renderedHtml = renderTemplate(templateHtml, templateData);
+  
+  // Add style class to card element
+  if (style !== 'dark') {
+    renderedHtml = renderedHtml.replace('class="card"', `class="card ${style}"`);
+  }
 
   // Get browser instance
   const browser = await getBrowser();
@@ -161,9 +167,10 @@ export async function generatePortfolioImage(
  */
 export async function generateAndSaveImage(
   portfolio: PortfolioData,
-  outputPath: string
+  outputPath: string,
+  style: CardStyle = 'dark'
 ): Promise<string> {
-  const imageBuffer = await generatePortfolioImage(portfolio);
+  const imageBuffer = await generatePortfolioImage(portfolio, style);
   
   // Ensure output directory exists
   const outputDir = path.dirname(outputPath);

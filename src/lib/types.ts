@@ -156,6 +156,7 @@ export interface ChartData {
 
 export interface GenerateRequest {
   input: string;  // App URL, Developer URL, or raw ID
+  style?: CardStyle;  // Card style: dark, light, minimal
 }
 
 export interface GenerateSuccessResponse {
@@ -191,4 +192,19 @@ export const CACHE_TTL_SECONDS = 3600;
 
 export const MAX_DISPLAYED_APPS = 8;
 export const TOP_CHART_LIMIT = 200;
+
+// --------------------------
+// Card Styles
+// --------------------------
+
+export type CardStyle = 'dark' | 'light' | 'minimal';
+export type CardSize = 'landscape' | 'story' | 'square';
+
+export const CARD_STYLES: CardStyle[] = ['dark', 'light', 'minimal'];
+
+export const CARD_DIMENSIONS: Record<CardSize, { width: number; height: number }> = {
+  landscape: { width: 1200, height: 630 },  // Twitter/OG
+  story: { width: 1080, height: 1920 },     // Instagram Story
+  square: { width: 1080, height: 1080 },    // Instagram Feed
+};
 

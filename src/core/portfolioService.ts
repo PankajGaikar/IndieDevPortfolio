@@ -131,7 +131,10 @@ export async function buildDeveloperPortfolio(
  * Prepare portfolio data for template rendering
  * Adds formatted values and template-specific flags
  */
-export function prepareTemplateData(portfolio: PortfolioData): Record<string, unknown> {
+export function prepareTemplateData(
+  portfolio: PortfolioData,
+  style: string = 'dark'
+): Record<string, unknown> {
   return {
     developerName: portfolio.developer.name,
     totalApps: portfolio.stats.totalApps,
@@ -147,6 +150,10 @@ export function prepareTemplateData(portfolio: PortfolioData): Record<string, un
     trendingCountryCount: portfolio.trending.totalTrendingCountries,
     trendingCountryLabel: portfolio.trending.totalTrendingCountries === 1 ? 'country' : 'countries',
     trendingCountries: portfolio.trending.countries,
+    // Card style
+    cardStyle: style,
+    isLight: style === 'light',
+    isMinimal: style === 'minimal',
   };
 }
 

@@ -14,6 +14,57 @@
       box-sizing: border-box;
     }
 
+    /* Theme Variables - Dark (default) */
+    :root {
+      --card-bg: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --badge-bg: rgba(255, 255, 255, 0.08);
+      --badge-border: rgba(255, 255, 255, 0.1);
+      --accent: #a78bfa;
+      --accent-bg: rgba(139, 92, 246, 0.15);
+      --accent-border: rgba(139, 92, 246, 0.3);
+      --star-color: #fbbf24;
+      --divider: rgba(255, 255, 255, 0.08);
+      --glow-1: rgba(139, 92, 246, 0.15);
+      --glow-2: rgba(59, 130, 246, 0.1);
+    }
+
+    /* Light Theme */
+    .card.light {
+      --card-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --badge-bg: rgba(15, 23, 42, 0.05);
+      --badge-border: rgba(15, 23, 42, 0.1);
+      --accent: #7c3aed;
+      --accent-bg: rgba(124, 58, 237, 0.1);
+      --accent-border: rgba(124, 58, 237, 0.25);
+      --star-color: #f59e0b;
+      --divider: rgba(15, 23, 42, 0.08);
+      --glow-1: rgba(124, 58, 237, 0.08);
+      --glow-2: rgba(59, 130, 246, 0.06);
+    }
+
+    /* Minimal Theme */
+    .card.minimal {
+      --card-bg: #ffffff;
+      --text-primary: #18181b;
+      --text-secondary: #52525b;
+      --text-muted: #a1a1aa;
+      --badge-bg: #f4f4f5;
+      --badge-border: #e4e4e7;
+      --accent: #18181b;
+      --accent-bg: #f4f4f5;
+      --accent-border: #d4d4d8;
+      --star-color: #18181b;
+      --divider: #e4e4e7;
+      --glow-1: transparent;
+      --glow-2: transparent;
+    }
+
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background: transparent;
@@ -27,7 +78,7 @@
     .card {
       width: 1200px;
       height: 630px;
-      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
+      background: var(--card-bg);
       border-radius: 24px;
       padding: 48px 56px;
       display: flex;
@@ -44,7 +95,7 @@
       right: -200px;
       width: 500px;
       height: 500px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, var(--glow-1) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -55,7 +106,7 @@
       left: -150px;
       width: 400px;
       height: 400px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, var(--glow-2) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -76,14 +127,14 @@
     .developer-name {
       font-size: 42px;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-primary);
       margin-bottom: 8px;
       letter-spacing: -0.5px;
     }
 
     .developer-subtitle {
       font-size: 18px;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-secondary);
       font-weight: 400;
     }
 
@@ -93,9 +144,9 @@
     }
 
     .stat-badge {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--badge-bg);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--badge-border);
       border-radius: 16px;
       padding: 16px 24px;
       text-align: center;
@@ -105,13 +156,13 @@
     .stat-value {
       font-size: 28px;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-primary);
       margin-bottom: 4px;
     }
 
     .stat-label {
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       font-weight: 500;
@@ -150,14 +201,19 @@
     }
 
     .app-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 4px;
-      max-width: 140px;
-      white-space: nowrap;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      max-width: 180px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.3;
+      text-align: center;
+      min-height: 34px;
     }
 
     .app-rating {
@@ -165,22 +221,22 @@
       align-items: center;
       gap: 4px;
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.7);
+      color: var(--text-secondary);
     }
 
     .app-rating .star {
-      color: #fbbf24;
+      color: var(--star-color);
     }
 
     .app-rating.new-app {
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       font-style: italic;
       font-size: 12px;
     }
 
     .remaining-apps {
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
       text-align: center;
       margin-top: 8px;
     }
@@ -189,7 +245,7 @@
     .trending-section {
       margin-top: auto;
       padding-top: 24px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid var(--divider);
       display: flex;
       align-items: center;
       gap: 24px;
@@ -203,12 +259,12 @@
 
     .trending-label {
       font-size: 15px;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-secondary);
       font-weight: 500;
     }
 
     .trending-label strong {
-      color: #a78bfa;
+      color: var(--accent);
       font-weight: 600;
     }
 
@@ -222,12 +278,12 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-border);
       border-radius: 20px;
       padding: 8px 14px;
       font-size: 14px;
-      color: #e9d5ff;
+      color: var(--text-primary);
       font-weight: 500;
     }
 
@@ -236,7 +292,7 @@
     }
 
     .trending-badge .rank {
-      color: #a78bfa;
+      color: var(--accent);
       font-weight: 600;
     }
 
@@ -252,12 +308,13 @@
 
     .watermark {
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--text-muted);
       font-weight: 400;
+      opacity: 0.6;
     }
 
     .watermark a {
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       text-decoration: none;
     }
 
