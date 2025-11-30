@@ -5,7 +5,7 @@
   "main": "dist/routes/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn src/routes/index.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r src/templates dist/",
     "start": "node dist/routes/index.js"
   },
   "keywords": [
