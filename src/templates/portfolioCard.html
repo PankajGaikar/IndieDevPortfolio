@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1200, height=630">
+  <title>Portfolio Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      width: 1200px;
+      height: 630px;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
+      border-radius: 24px;
+      padding: 48px 56px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background elements */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: -150px;
+      left: -150px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .developer-info {
+      flex: 1;
+    }
+
+    .developer-name {
+      font-size: 42px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .developer-subtitle {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 400;
+    }
+
+    .stats-badges {
+      display: flex;
+      gap: 16px;
+    }
+
+    .stat-badge {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px 24px;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    /* Apps Grid */
+    .apps-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+
+    .app-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .app-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      margin-bottom: 12px;
+      object-fit: cover;
+    }
+
+    .app-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 4px;
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .app-rating .star {
+      color: #fbbf24;
+    }
+
+    .app-rating.new-app {
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    .remaining-apps {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* Trending Section */
+    .trending-section {
+      margin-top: auto;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .trending-section.hidden {
+      display: none;
+    }
+
+    .trending-label {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
+    }
+
+    .trending-label strong {
+      color: #a78bfa;
+      font-weight: 600;
+    }
+
+    .trending-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .trending-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 14px;
+      color: #e9d5ff;
+      font-weight: 500;
+    }
+
+    .trending-badge .flag {
+      font-size: 16px;
+    }
+
+    .trending-badge .rank {
+      color: #a78bfa;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .watermark {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.3);
+      font-weight: 400;
+    }
+
+    .watermark a {
+      color: rgba(255, 255, 255, 0.4);
+      text-decoration: none;
+    }
+
+    /* Utility for hiding trending when not applicable */
+    .no-trending .trending-section {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <!-- Header: Developer Name + Stats -->
+    <div class="header">
+      <div class="developer-info">
+        <h1 class="developer-name">{{developerName}}</h1>
+        <p class="developer-subtitle">iOS Developer Portfolio</p>
+      </div>
+      <div class="stats-badges">
+        <div class="stat-badge">
+          <div class="stat-value">{{totalApps}}</div>
+          <div class="stat-label">Apps</div>
+        </div>
+        <div class="stat-badge">
+          <div class="stat-value">{{totalRatings}}</div>
+          <div class="stat-label">Ratings</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Apps Grid (2 rows x 4 columns = 8 max) -->
+    <div class="apps-section">
+      <div class="apps-grid">
+        {{#apps}}
+        <div class="app-item">
+          <img class="app-icon" src="{{iconUrl}}" alt="{{name}}" crossorigin="anonymous">
+          <div class="app-name">{{name}}</div>
+          {{#isNewApp}}
+          <div class="app-rating new-app">New App</div>
+          {{/isNewApp}}
+          {{^isNewApp}}
+          <div class="app-rating">
+            <span class="star">★</span>
+            <span>{{rating}}</span>
+            <span>({{ratingCountFormatted}})</span>
+          </div>
+          {{/isNewApp}}
+        </div>
+        {{/apps}}
+      </div>
+      {{#hasRemainingApps}}
+      <div class="remaining-apps">+ {{remainingApps}} more apps</div>
+      {{/hasRemainingApps}}
+    </div>
+
+    <!-- Trending Section (hidden if no trending) -->
+    <div class="trending-section {{#noTrending}}hidden{{/noTrending}}">
+      <div class="trending-label">
+        Trending in <strong>{{trendingCountryCount}} {{trendingCountryLabel}}</strong>
+      </div>
+      <div class="trending-badges">
+        {{#trendingCountries}}
+        <div class="trending-badge">
+          <span class="flag">{{flag}}</span>
+          <span class="rank">Top {{bestRank}}</span>
+        </div>
+        {{/trendingCountries}}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="watermark">Generated with IndiePortfolio.dev</div>
+    </div>
+  </div>
+</body>
+</html>
+

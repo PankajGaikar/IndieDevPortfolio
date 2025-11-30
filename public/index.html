@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indie Portfolio Showcaser — Share Your iOS Developer Journey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #08080f;
+      --bg-secondary: #0f0f1a;
+      --bg-card: #141420;
+      --accent-purple: #a855f7;
+      --accent-purple-dim: rgba(168, 85, 247, 0.15);
+      --accent-blue: #3b82f6;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --success: #22c55e;
+      --error: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background Effects */
+    .bg-effects {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-effects::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+    }
+
+    .bg-effects::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    }
+
+    /* Grid Pattern */
+    .grid-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Main Card */
+    .main-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 40px;
+    }
+
+    /* Input Group */
+    .input-group {
+      margin-bottom: 24px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 18px 20px;
+      font-size: 16px;
+      font-family: inherit;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 0 3px var(--accent-purple-dim);
+    }
+
+    .url-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Generate Button */
+    .generate-btn {
+      width: 100%;
+      padding: 18px 32px;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: inherit;
+      background: linear-gradient(135deg, var(--accent-purple) 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(168, 85, 247, 0.3);
+    }
+
+    .generate-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Loading State */
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status Messages */
+    .status {
+      margin-top: 20px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status.visible {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status.loading {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    .status.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .status.success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    /* Result Section */
+    .result-section {
+      display: none;
+      margin-top: 40px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .result-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .result-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .result-image-wrapper {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .result-image {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      display: block;
+    }
+
+    /* Download Button */
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .download-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--accent-purple);
+    }
+
+    /* Example URLs */
+    .examples {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .examples-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .example-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .example-chip {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .example-chip:hover {
+      color: var(--text-primary);
+      border-color: var(--accent-purple);
+    }
+
+    /* Features */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-purple-dim);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .footer p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: var(--accent-purple);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile Adjustments */
+    @media (max-width: 640px) {
+      .container {
+        padding: 40px 16px;
+      }
+
+      .main-card {
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-effects"></div>
+  <div class="grid-pattern"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">📱</div>
+        <span class="logo-text">IndiePortfolio</span>
+      </div>
+      <h1>Showcase Your iOS Journey</h1>
+      <p class="subtitle">
+        Generate beautiful, shareable portfolio cards for your App Store apps. 
+        Just paste a link and we'll do the rest.
+      </p>
+    </header>
+
+    <div class="main-card">
+      <div class="input-group">
+        <label class="input-label">App Store URL or Developer ID</label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            class="url-input" 
+            id="urlInput"
+            placeholder="https://apps.apple.com/app/your-app/id123456789"
+            autocomplete="off"
+          >
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" onclick="generateCard()">
+        <span id="btnText">Generate Portfolio Card</span>
+        <div class="loading-spinner" id="btnSpinner" style="display: none;"></div>
+      </button>
+
+      <div class="status" id="status"></div>
+
+      <div class="examples">
+        <div class="examples-label">Try an example:</div>
+        <div class="example-chips">
+          <button class="example-chip" onclick="useExample('284882215')">Facebook</button>
+          <button class="example-chip" onclick="useExample('389801252')">Instagram</button>
+          <button class="example-chip" onclick="useExample('333903271')">Twitter/X</button>
+          <button class="example-chip" onclick="useExample('310633997')">WhatsApp</button>
+        </div>
+      </div>
+
+      <div class="result-section" id="resultSection">
+        <div class="result-header">
+          <span class="result-title">Your Portfolio Card</span>
+          <span class="result-meta" id="resultMeta"></span>
+        </div>
+        <div class="result-image-wrapper">
+          <img class="result-image" id="resultImage" alt="Portfolio Card">
+        </div>
+        <button class="download-btn" id="downloadBtn" onclick="downloadImage()">
+          <span>⬇️</span>
+          <span>Download Image</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Portfolio Stats</div>
+        <div class="feature-desc">
+          Automatically aggregates your total apps and combined ratings from the App Store.
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-title">Global Trending</div>
+        <div class="feature-desc">
+          Shows if your apps are trending in the US, UK, India, Canada, or Australia.
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Shareable Design</div>
+        <div class="feature-desc">
+          Perfect 1200×630 cards optimized for Twitter, LinkedIn, and Instagram.
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>Built for indie iOS developers ❤️</p>
+    </footer>
+  </div>
+
+  <script>
+    let currentImageBlob = null;
+    let currentDeveloperName = '';
+
+    function setLoading(isLoading) {
+      const btn = document.getElementById('generateBtn');
+      const btnText = document.getElementById('btnText');
+      const spinner = document.getElementById('btnSpinner');
+      
+      btn.disabled = isLoading;
+      btnText.textContent = isLoading ? 'Generating...' : 'Generate Portfolio Card';
+      spinner.style.display = isLoading ? 'block' : 'none';
+    }
+
+    function showStatus(message, type) {
+      const status = document.getElementById('status');
+      status.className = `status visible ${type}`;
+      status.innerHTML = message;
+    }
+
+    function hideStatus() {
+      document.getElementById('status').className = 'status';
+    }
+
+    function useExample(appId) {
+      document.getElementById('urlInput').value = appId;
+      generateCard();
+    }
+
+    async function generateCard() {
+      const input = document.getElementById('urlInput').value.trim();
+      
+      if (!input) {
+        showStatus('Please enter an App Store URL or ID', 'error');
+        return;
+      }
+
+      setLoading(true);
+      hideStatus();
+      document.getElementById('resultSection').className = 'result-section';
+
+      try {
+        showStatus('🔍 Fetching app data from App Store...', 'loading');
+
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to generate card');
+        }
+
+        // Get metadata from headers
+        currentDeveloperName = decodeURIComponent(response.headers.get('X-Developer-Name') || 'Developer');
+        const totalApps = response.headers.get('X-Total-Apps') || '?';
+        const totalRatings = response.headers.get('X-Total-Ratings') || '?';
+        const genTime = response.headers.get('X-Generation-Time') || '';
+
+        // Convert response to blob
+        currentImageBlob = await response.blob();
+        const imageUrl = URL.createObjectURL(currentImageBlob);
+
+        // Display result
+        document.getElementById('resultImage').src = imageUrl;
+        document.getElementById('resultMeta').textContent = 
+          `${totalApps} apps • ${formatNumber(totalRatings)} ratings${genTime ? ` • ${genTime}` : ''}`;
+        document.getElementById('resultSection').className = 'result-section visible';
+        
+        showStatus(`✨ Portfolio card generated for <strong>${currentDeveloperName}</strong>!`, 'success');
+
+      } catch (error) {
+        console.error('Generation error:', error);
+        showStatus(`❌ ${error.message}`, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function downloadImage() {
+      if (!currentImageBlob) return;
+
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(currentImageBlob);
+      link.download = `${currentDeveloperName.replace(/\s+/g, '-')}-portfolio.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function formatNumber(num) {
+      const n = parseInt(num, 10);
+      if (isNaN(n)) return num;
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    // Allow Enter key to trigger generation
+    document.getElementById('urlInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        generateCard();
+      }
+    });
+  </script>
+</body>
+</html>
+
