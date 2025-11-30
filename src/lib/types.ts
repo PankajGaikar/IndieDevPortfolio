@@ -157,6 +157,7 @@ export interface ChartData {
 export interface GenerateRequest {
   input: string;  // App URL, Developer URL, or raw ID
   style?: CardStyle;  // Card style: dark, light, minimal
+  size?: CardSize;    // Card size: landscape, story, square
 }
 
 export interface GenerateSuccessResponse {

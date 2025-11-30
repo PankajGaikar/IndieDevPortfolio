@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { buildDeveloperPortfolio } from '../core/portfolioService';
 import { generatePortfolioImage, generateOutputFilename } from '../generator/imageGenerator';
-import { GenerateRequest, GenerateResponse, CardStyle, CARD_STYLES } from '../lib/types';
+import { GenerateRequest, GenerateResponse, CardStyle, CardSize, CARD_STYLES, CARD_DIMENSIONS } from '../lib/types';
 import * as fs from 'fs';
 import * as path from 'path';
+
+const VALID_SIZES: CardSize[] = ['landscape', 'story', 'square'];
 
 const router = Router();
 
@@ -25,14 +27,19 @@ if (!fs.existsSync(OUTPUT_DIR)) {
  */
 router.post('/', async (req: Request, res: Response) => {
   const startTime = Date.now();
-  const { input, style: requestedStyle } = req.body as GenerateRequest;
+  const { input, style: requestedStyle, size: requestedSize } = req.body as GenerateRequest;
   
   // Validate and default style
   const style: CardStyle = CARD_STYLES.includes(requestedStyle as CardStyle) 
     ? (requestedStyle as CardStyle) 
     : 'dark';
+  
+  // Validate and default size
+  const size: CardSize = VALID_SIZES.includes(requestedSize as CardSize)
+    ? (requestedSize as CardSize)
+    : 'landscape';
 
-  console.log(`[API] Generate request: ${input} (style: ${style})`);
+  console.log(`[API] Generate request: ${input} (style: ${style}, size: ${size})`);
 
   // Validate input
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
@@ -58,7 +65,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Step 2: Generate the image
-    const imageBuffer = await generatePortfolioImage(portfolioResult.data, style);
+    const imageBuffer = await generatePortfolioImage(portfolioResult.data, style, size);
 
     // Step 3: Save to output directory (optional, for debugging)
     const filename = generateOutputFilename(portfolioResult.data.developer.id);

@@ -430,40 +430,54 @@
       border-color: var(--accent-purple);
     }
 
-    /* Style Selector */
-    .style-selector {
+    /* Options Row */
+    .options-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
       margin-bottom: 24px;
     }
 
-    .style-options {
-      display: flex;
-      gap: 12px;
+    @media (max-width: 700px) {
+      .options-row {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .style-option {
+    /* Style Selector */
+    .style-selector, .size-selector {
+      flex: 1;
+    }
+
+    .style-options, .size-options {
+      display: flex;
+      gap: 10px;
+    }
+
+    .style-option, .size-option {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 16px;
+      gap: 6px;
+      padding: 12px 8px;
       background: var(--bg-secondary);
       border: 2px solid var(--border-color);
       border-radius: 12px;
       cursor: pointer;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       color: var(--text-secondary);
       transition: all 0.2s ease;
     }
 
-    .style-option:hover {
+    .style-option:hover, .size-option:hover {
       border-color: var(--accent-purple);
       color: var(--text-primary);
     }
 
-    .style-option.active {
+    .style-option.active, .size-option.active {
       border-color: var(--accent-purple);
       background: var(--accent-purple-dim);
       color: var(--text-primary);
@@ -471,7 +485,7 @@
 
     .style-preview {
       width: 100%;
-      height: 40px;
+      height: 32px;
       border-radius: 6px;
       border: 1px solid var(--border-color);
     }
@@ -486,6 +500,34 @@
 
     .style-preview.minimal {
       background: #ffffff;
+    }
+
+    /* Size Previews */
+    .size-preview {
+      border-radius: 4px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+    }
+
+    .size-preview.landscape {
+      width: 48px;
+      height: 25px;
+    }
+
+    .size-preview.story {
+      width: 20px;
+      height: 36px;
+    }
+
+    .size-preview.square {
+      width: 32px;
+      height: 32px;
+    }
+
+    .size-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 400;
     }
 
     /* Example URLs */
@@ -636,21 +678,44 @@
         </div>
       </div>
 
-      <div class="style-selector">
-        <label class="input-label">Card Style</label>
-        <div class="style-options">
-          <button class="style-option active" data-style="dark" onclick="selectStyle('dark')">
-            <span class="style-preview dark"></span>
-            <span>Dark</span>
-          </button>
-          <button class="style-option" data-style="light" onclick="selectStyle('light')">
-            <span class="style-preview light"></span>
-            <span>Light</span>
-          </button>
-          <button class="style-option" data-style="minimal" onclick="selectStyle('minimal')">
-            <span class="style-preview minimal"></span>
-            <span>Minimal</span>
-          </button>
+      <div class="options-row">
+        <div class="style-selector">
+          <label class="input-label">Card Style</label>
+          <div class="style-options">
+            <button class="style-option active" data-style="dark" onclick="selectStyle('dark')">
+              <span class="style-preview dark"></span>
+              <span>Dark</span>
+            </button>
+            <button class="style-option" data-style="light" onclick="selectStyle('light')">
+              <span class="style-preview light"></span>
+              <span>Light</span>
+            </button>
+            <button class="style-option" data-style="minimal" onclick="selectStyle('minimal')">
+              <span class="style-preview minimal"></span>
+              <span>Minimal</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="size-selector">
+          <label class="input-label">Card Size</label>
+          <div class="size-options">
+            <button class="size-option active" data-size="landscape" onclick="selectSize('landscape')">
+              <span class="size-preview landscape"></span>
+              <span>Landscape</span>
+              <span class="size-label">Twitter/OG</span>
+            </button>
+            <button class="size-option" data-size="story" onclick="selectSize('story')">
+              <span class="size-preview story"></span>
+              <span>Story</span>
+              <span class="size-label">Instagram</span>
+            </button>
+            <button class="size-option" data-size="square" onclick="selectSize('square')">
+              <span class="size-preview square"></span>
+              <span>Square</span>
+              <span class="size-label">Feed</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -743,11 +808,19 @@
     let currentImageBlob = null;
     let currentDeveloperName = '';
     let currentStyle = 'dark';
+    let currentSize = 'landscape';
 
     function selectStyle(style) {
       currentStyle = style;
       document.querySelectorAll('.style-option').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.style === style);
+      });
+    }
+
+    function selectSize(size) {
+      currentSize = size;
+      document.querySelectorAll('.size-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.size === size);
       });
     }
 
@@ -803,7 +876,7 @@
         const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ input, style: currentStyle }),
+          body: JSON.stringify({ input, style: currentStyle, size: currentSize }),
         });
 
         if (!response.ok) {

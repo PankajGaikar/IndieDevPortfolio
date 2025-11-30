@@ -1,11 +1,8 @@
 import puppeteer, { Browser } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PortfolioData, CardStyle } from '../lib/types';
+import { PortfolioData, CardStyle, CardSize, CARD_DIMENSIONS } from '../lib/types';
 import { prepareTemplateData } from '../core/portfolioService';
-
-const CARD_WIDTH = 1200;
-const CARD_HEIGHT = 630;
 const TEMPLATE_PATH = path.join(__dirname, '../templates/portfolioCard.html');
 
 // Browser instance for reuse
@@ -79,9 +76,11 @@ function renderTemplate(template: string, data: Record<string, unknown>): string
  */
 export async function generatePortfolioImage(
   portfolio: PortfolioData,
-  style: CardStyle = 'dark'
+  style: CardStyle = 'dark',
+  size: CardSize = 'landscape'
 ): Promise<Buffer> {
-  console.log(`[Generator] Generating ${style} image for ${portfolio.developer.name}`);
+  const dimensions = CARD_DIMENSIONS[size];
+  console.log(`[Generator] Generating ${style}/${size} image for ${portfolio.developer.name} (${dimensions.width}x${dimensions.height})`);
   const startTime = Date.now();
 
   // Read and render the template
@@ -89,10 +88,12 @@ export async function generatePortfolioImage(
   const templateData = prepareTemplateData(portfolio, style);
   let renderedHtml = renderTemplate(templateHtml, templateData);
   
-  // Add style class to card element
-  if (style !== 'dark') {
-    renderedHtml = renderedHtml.replace('class="card"', `class="card ${style}"`);
-  }
+  // Build CSS classes for card
+  const classes = ['card'];
+  if (style !== 'dark') classes.push(style);
+  if (size !== 'landscape') classes.push(size);
+  
+  renderedHtml = renderedHtml.replace('class="card"', `class="${classes.join(' ')}"`);
 
   // Get browser instance
   const browser = await getBrowser();
@@ -101,8 +102,8 @@ export async function generatePortfolioImage(
   try {
     // Set viewport to card dimensions
     await page.setViewport({
-      width: CARD_WIDTH,
-      height: CARD_HEIGHT,
+      width: dimensions.width,
+      height: dimensions.height,
       deviceScaleFactor: 2, // 2x for retina quality
     });
 
@@ -168,9 +169,10 @@ export async function generatePortfolioImage(
 export async function generateAndSaveImage(
   portfolio: PortfolioData,
   outputPath: string,
-  style: CardStyle = 'dark'
+  style: CardStyle = 'dark',
+  size: CardSize = 'landscape'
 ): Promise<string> {
-  const imageBuffer = await generatePortfolioImage(portfolio, style);
+  const imageBuffer = await generatePortfolioImage(portfolio, style, size);
   
   // Ensure output directory exists
   const outputDir = path.dirname(outputPath);
